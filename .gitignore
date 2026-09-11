@@ -1,0 +1,21 @@
+# Build output
+build/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Tooling and generated reports
+.cache/
+compile_commands.json
+coverage/
+*.profraw
+*.profdata
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+*.swp
