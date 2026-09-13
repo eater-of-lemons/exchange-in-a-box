@@ -1,21 +1,21 @@
 # exchange in a box
 
-A deterministic low-latency matching engine and limit order book, built in modern C++ for correctness first and performance second.
+a deterministic low-latency matching engine and limit order book, built in modern C++ for correctness first and performance second.
 
-> **Status:** phase 0 — specification and design. The repository is public from day one so the decisions, mistakes, measurements, and improvements stay visible.
+> **status:** phase 0 — specification and design. the repository is public from day one so the decisions, mistakes, measurements, and improvements stay visible.
 
-The goal is not to cosplay a production exchange. It is to build a small system that is understandable end to end, strict enough to expose bad assumptions, and measured well enough that every performance claim has evidence.
+the goal is not to cosplay a production exchange. it is to build a small system that is understandable end to end, strict enough to expose bad assumptions, and measured well enough that every performance claim has evidence.
 
-## What this should prove
+## what this should prove
 
-- Exchange behavior is defined explicitly rather than discovered through bugs.
-- Price-time priority and order lifecycle rules remain correct under awkward event sequences.
-- The same input stream always produces the same executions and final book state.
-- Tests cover examples, invariants, generated event sequences, fuzz input, and recovery.
-- Latency work starts with a reproducible baseline and changes one bottleneck at a time.
-- Design decisions explain both the chosen path and the rejected alternatives.
+- exchange behavior is defined explicitly rather than discovered through bugs.
+- price-time priority and order lifecycle rules remain correct under awkward event sequences.
+- the same input stream always produces the same executions and final book state.
+- tests cover examples, invariants, generated event sequences, fuzz input, and recovery.
+- latency work starts with a reproducible baseline and changes one bottleneck at a time.
+- design decisions explain both the chosen path and the rejected alternatives.
 
-## Initial system boundary
+## initial system boundary
 
 ```text
 order commands
@@ -30,40 +30,40 @@ validation → sequencing → matching engine → execution reports
                          surround the core
 ```
 
-The matching core starts as a **single-writer deterministic state machine**. Networking, concurrency, persistence, and multi-symbol sharding are added only after the semantics are correct and measurable.
+the matching core starts as a **single-writer deterministic state machine**. networking, concurrency, persistence, and multi-symbol sharding are added only after the semantics are correct and measurable.
 
-## Version-one scope
+## version-one scope
 
-- Integer tick prices and integer quantities; no floating-point money.
-- One symbol, then multiple independently sharded symbols.
-- Limit orders with price-time priority.
-- New, cancel, and replace commands with explicit priority rules.
+- integer tick prices and integer quantities; no floating-point money.
+- one symbol, then multiple independently sharded symbols.
+- limit orders with price-time priority.
+- new, cancel, and replace commands with explicit priority rules.
 - GTC and IOC behavior; more order types only after the core is stable.
-- Execution reports and top-of-book/depth events.
-- Append-only command/event journal and deterministic replay.
-- Correctness-first reference implementation plus an optimized implementation.
-- Reproducible throughput and p50/p95/p99/p99.9 latency reports.
+- execution reports and top-of-book/depth events.
+- append-only command/event journal and deterministic replay.
+- correctness-first reference implementation plus an optimized implementation.
+- reproducible throughput and p50/p95/p99/p99.9 latency reports.
 
-## Non-goals, for now
+## non-goals, for now
 
-- A trading strategy or claims about profitability.
-- A web dashboard.
-- Distributed consensus or active-active matching.
-- Kernel bypass, custom hardware, or lock-free structures before profiling justifies them.
-- Comparing benchmark numbers from different machines as if they were equivalent.
+- a trading strategy or claims about profitability.
+- a web dashboard.
+- distributed consensus or active-active matching.
+- kernel bypass, custom hardware, or lock-free structures before profiling justifies them.
+- comparing benchmark numbers from different machines as if they were equivalent.
 
-## Engineering rules
+## engineering rules
 
-1. **Specify before optimizing.** Exchange rules and invariants are written before the fast path.
-2. **Correctness is observable.** Commands produce explicit events; replay can reconstruct state.
-3. **No mystery numbers.** Benchmarks include hardware, compiler, flags, workload, warmup, and distribution.
-4. **No speculative cleverness.** Every optimization needs a profile and before/after evidence.
-5. **Keep the core deterministic.** I/O and concurrency live at the boundary.
-6. **Make failure testable.** Invalid commands, truncated journals, duplicate messages, and restart paths are deliberate cases.
+1. **specify before optimizing.** exchange rules and invariants are written before the fast path.
+2. **correctness is observable.** commands produce explicit events; replay can reconstruct state.
+3. **no mystery numbers.** benchmarks include hardware, compiler, flags, workload, warmup, and distribution.
+4. **no speculative cleverness.** every optimization needs a profile and before/after evidence.
+5. **keep the core deterministic.** I/O and concurrency live at the boundary.
+6. **make failure testable.** invalid commands, truncated journals, duplicate messages, and restart paths are deliberate cases.
 
-## What “done” looks like
+## what “done” looks like
 
-A reviewer can:
+a reviewer can:
 
 1. read the matching rules and invariants;
 2. build the project with one documented command;
@@ -73,9 +73,9 @@ A reviewer can:
 6. inspect profiles and decision records for each meaningful optimization; and
 7. understand where the design stops being production-ready.
 
-## Plan
+## plan
 
 - [`ROADMAP.md`](ROADMAP.md) — implementation phases, deliverables, and acceptance criteria.
 - [`LEARNING.md`](LEARNING.md) — what each phase is meant to teach and the questions the finished project should answer.
 
-The first code milestone will establish the C++20 build, sanitizers, domain types, command/event model, and executable specification. No latency claims until there is a correct baseline.
+the first code milestone will establish the C++20 build, sanitizers, domain types, command/event model, and executable specification. no latency claims until there is a correct baseline.

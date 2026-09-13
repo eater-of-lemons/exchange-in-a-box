@@ -1,123 +1,123 @@
-# Roadmap
+# roadmap
 
-Each phase should end in a small reviewable commit or pull request. Do not optimize ahead of the current phase: the project is meant to preserve the reasoning trail, not only the final code.
+each phase should end in a small reviewable commit or pull request. do not optimize ahead of the current phase: the project is meant to preserve the reasoning trail, not only the final code.
 
-## Phase 0 — specify the exchange
+## phase 0 — specify the exchange
 
-**Build**
+**build**
 
-- Define tick price, quantity, order ID, client ID, sequence number, and timestamp semantics.
-- Write rules for price-time priority, crossing, partial fills, cancel, and replace.
-- Define command rejection reasons and the order lifecycle state machine.
-- List core invariants and create hand-worked matching examples.
-- Record initial architecture decisions, including integer prices and a single-writer core.
+- define tick price, quantity, order ID, client ID, sequence number, and timestamp semantics.
+- write rules for price-time priority, crossing, partial fills, cancel, and replace.
+- define command rejection reasons and the order lifecycle state machine.
+- list core invariants and create hand-worked matching examples.
+- record initial architecture decisions, including integer prices and a single-writer core.
 
-**Deliverables**
+**deliverables**
 
 - `docs/SPEC.md`
 - `docs/INVARIANTS.md`
 - architecture decision records in `docs/decisions/`
 - golden input/output examples under `testdata/`
 
-**Acceptance**
+**acceptance**
 
-A reader can determine the exact outcome of every supported command without reading C++.
+a reader can determine the exact outcome of every supported command without reading C++.
 
-## Phase 1 — build a boring, safe skeleton
+## phase 1 — build a boring, safe skeleton
 
-**Build**
+**build**
 
 - C++20 CMake project with pinned test and benchmark dependencies.
-- Debug, release, AddressSanitizer, UndefinedBehaviorSanitizer, and coverage presets.
-- Strong domain types for prices, quantities, IDs, commands, and events.
-- A command-line runner that accepts a fixed event stream and prints events.
+- debug, release, AddressSanitizer, UndefinedBehaviorSanitizer, and coverage presets.
+- strong domain types for prices, quantities, IDs, commands, and events.
+- a command-line runner that accepts a fixed event stream and prints events.
 - CI for build, tests, formatting, and sanitizers.
 
-**Acceptance**
+**acceptance**
 
-A clean clone configures, builds, and runs tests through documented commands on Linux and macOS.
+a clean clone configures, builds, and runs tests through documented commands on Linux and macOS.
 
-## Phase 2 — correctness-first reference book
+## phase 2 — correctness-first reference book
 
-**Build**
+**build**
 
-- One-symbol limit order book using simple standard-library containers.
-- Bid/ask ordering, FIFO queues at each price, and O(1)-by-ID cancellation where practical.
+- one-symbol limit order book using simple standard-library containers.
+- bid/ask ordering, FIFO queues at each price, and O(1)-by-ID cancellation where practical.
 - GTC limit orders first, then IOC.
-- New, cancel, and replace with explicit priority-loss behavior.
-- Execution and market-data events emitted by the core.
+- new, cancel, and replace with explicit priority-loss behavior.
+- execution and market-data events emitted by the core.
 
-**Acceptance**
+**acceptance**
 
-All golden examples pass, book invariants are checked after every command in debug builds, and the implementation makes no performance claims.
+all golden examples pass, book invariants are checked after every command in debug builds, and the implementation makes no performance claims.
 
-## Phase 3 — attack correctness
+## phase 3 — attack correctness
 
-**Build**
+**build**
 
-- Unit tests for boundaries and order lifecycle transitions.
-- Property tests over generated command sequences.
-- A deliberately slow reference model for differential testing.
-- Fuzz targets for command decoding and engine transitions.
-- Sanitizer runs for generated and fuzzed workloads.
+- unit tests for boundaries and order lifecycle transitions.
+- property tests over generated command sequences.
+- a deliberately slow reference model for differential testing.
+- fuzz targets for command decoding and engine transitions.
+- sanitizer runs for generated and fuzzed workloads.
 
-**Properties to enforce**
+**properties to enforce**
 
-- Bids never cross asks after matching completes.
-- Visible quantity equals the sum of resting order quantities.
-- Filled plus remaining quantity never exceeds submitted quantity.
+- bids never cross asks after matching completes.
+- visible quantity equals the sum of resting order quantities.
+- filled plus remaining quantity never exceeds submitted quantity.
 - IDs and sequence numbers obey their uniqueness/ordering rules.
-- Events conserve quantity and follow legal state transitions.
-- Replay of the same commands produces the same events and checksum.
+- events conserve quantity and follow legal state transitions.
+- replay of the same commands produces the same events and checksum.
 
-**Acceptance**
+**acceptance**
 
-A long seeded random run matches the reference model, and failures print a minimal reproducible sequence.
+a long seeded random run matches the reference model, and failures print a minimal reproducible sequence.
 
-## Phase 4 — journal, replay, and recovery
+## phase 4 — journal, replay, and recovery
 
-**Build**
+**build**
 
-- Versioned append-only command/event format with checksums.
-- Deterministic replay tool.
-- Snapshot format and snapshot-plus-tail recovery.
-- Behavior for duplicate, missing, corrupt, and truncated records.
-- State checksum and replay verification command.
+- versioned append-only command/event format with checksums.
+- deterministic replay tool.
+- snapshot format and snapshot-plus-tail recovery.
+- behavior for duplicate, missing, corrupt, and truncated records.
+- state checksum and replay verification command.
 
-**Acceptance**
+**acceptance**
 
-Kill the process at selected write points, restart it, and recover to the last valid sequence without inventing or duplicating executions.
+kill the process at selected write points, restart it, and recover to the last valid sequence without inventing or duplicating executions.
 
-## Phase 5 — establish an honest baseline
+## phase 5 — establish an honest baseline
 
-**Build**
+**build**
 
-- Benchmark harness with fixed seeds and named workloads:
+- benchmark harness with fixed seeds and named workloads:
   - balanced flow;
   - cancel-heavy flow;
   - deep book;
   - crossing burst;
   - adversarial hot price level.
-- Report throughput and p50/p95/p99/p99.9 latency, not only an average.
-- Capture CPU, OS, compiler, flags, frequency policy, warmup, and run count.
-- Collect profiles, cache/branch counters where available, and flamegraphs.
+- report throughput and p50/p95/p99/p99.9 latency, not only an average.
+- capture CPU, OS, compiler, flags, frequency policy, warmup, and run count.
+- collect profiles, cache/branch counters where available, and flamegraphs.
 
-**Acceptance**
+**acceptance**
 
-Another person on the same environment can reproduce the report shape and understand its limitations.
+another person on the same environment can reproduce the report shape and understand its limitations.
 
-## Phase 6 — optimize from evidence
+## phase 6 — optimize from evidence
 
-**Possible experiments, not pre-decided solutions**
+**possible experiments, not pre-decided solutions**
 
-- Data-oriented order and price-level layout.
-- Stable object pools or arena allocation.
-- Intrusive FIFO lists.
-- Flat/ordered price-level indexes.
-- Reduced copying and tighter event representation.
-- Branch and cache behavior improvements.
+- data-oriented order and price-level layout.
+- stable object pools or arena allocation.
+- intrusive FIFO lists.
+- flat/ordered price-level indexes.
+- reduced copying and tighter event representation.
+- branch and cache behavior improvements.
 
-For every accepted optimization:
+for every accepted optimization:
 
 1. preserve the reference implementation;
 2. state the bottleneck and hypothesis;
@@ -125,42 +125,42 @@ For every accepted optimization:
 4. report before/after distributions on the same workload; and
 5. record memory and complexity trade-offs.
 
-**Acceptance**
+**acceptance**
 
-Every optimization has profile evidence and no semantic divergence from the reference model.
+every optimization has profile evidence and no semantic divergence from the reference model.
 
-## Phase 7 — boundaries, backpressure, and concurrency
+## phase 7 — boundaries, backpressure, and concurrency
 
-**Build**
+**build**
 
-- Keep matching single-writer; move ingress and egress to explicit boundaries.
-- Add a versioned binary wire format and gateway process.
-- Use bounded queues with documented ownership and backpressure behavior.
-- Separate receive, sequence/match, journal, and publish concerns.
-- Measure coordinated omission and queueing delay separately from engine service time.
+- keep matching single-writer; move ingress and egress to explicit boundaries.
+- add a versioned binary wire format and gateway process.
+- use bounded queues with documented ownership and backpressure behavior.
+- separate receive, sequence/match, journal, and publish concerns.
+- measure coordinated omission and queueing delay separately from engine service time.
 
-**Acceptance**
+**acceptance**
 
-Load beyond capacity degrades according to a documented policy rather than silently growing memory or reordering commands.
+load beyond capacity degrades according to a documented policy rather than silently growing memory or reordering commands.
 
-## Phase 8 — multi-symbol operation and final report
+## phase 8 — multi-symbol operation and final report
 
-**Build**
+**build**
 
-- Shard independent symbols while preserving per-symbol order.
-- Add operational metrics, structured logs, and fault-injection scenarios.
-- Publish architecture diagrams, benchmark tables, profiles, and known limitations.
-- Write two technical notes:
+- shard independent symbols while preserving per-symbol order.
+- add operational metrics, structured logs, and fault-injection scenarios.
+- publish architecture diagrams, benchmark tables, profiles, and known limitations.
+- write two technical notes:
   - “what a matching engine must never get wrong”;
   - “benchmarking without lying to yourself.”
 
-**Acceptance**
+**acceptance**
 
-The repository supports a reproducible correctness demonstration, recovery demonstration, and benchmark run, with honest boundaries around every result.
+the repository supports a reproducible correctness demonstration, recovery demonstration, and benchmark run, with honest boundaries around every result.
 
-## Suggested implementation rhythm
+## suggested implementation rhythm
 
-For each phase:
+for each phase:
 
 1. write the rule or hypothesis;
 2. add the test or measurement method;
