@@ -1,0 +1,43 @@
+name: docs check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - "scripts/check_docs.py"
+      - "tests/test_check_docs.py"
+      - ".github/workflows/docs-check.yml"
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "scripts/check_docs.py"
+      - "tests/test_check_docs.py"
+      - ".github/workflows/docs-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    name: links, structure, and lowercase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: show Python version
+        run: python3 --version
+
+      - name: test the checker
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: check the docs
+        run: python3 scripts/check_docs.py
